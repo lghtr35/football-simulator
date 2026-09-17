@@ -1,4 +1,7 @@
-# Be A Footballer Simulation
+# Football Simulation
+
+A host-agnostic library for leagues, clubs, fixtures, matches, player development and transfers.
+Games (including Be A Footballer) sit on top of it; this project does not know about a specific career game.
 
 The shared API and rule libraries target `netstandard2.1`.
 Start with [Running a playthrough](RUNNING.md) for complete API and integration-test examples.
@@ -11,11 +14,11 @@ The console project is only an example host of the API.
 
 ## Unity import
 
-Run `./Build-UnityLibraries.ps1` from this folder. It builds the solution and copies the `netstandard2.1` simulation DLLs to `Game/Assets/Plugins/Simulation`, where Unity automatically imports them. The CLI and test assemblies are never copied to Unity.
+Run `./Build-UnityLibraries.ps1` from this folder. It builds the solution and copies the `netstandard2.1` simulation DLLs to `Build/`, where Unity automatically imports them. The CLI and test assemblies are never copied to Unity.
 
 Do not use Unity-specific APIs or platform-specific .NET APIs in a simulation library. The game knows the controlled footballer by ID; simulation assemblies treat every footballer equally.
 
-`Footballer.Simulation.Persistence.Sqlite` is the Windows MVP SQLite adapter and is deliberately excluded from Unity DLL import. The simulation models remain portable; a Unity-compatible SQLite binding will implement the same persistence boundary when mobile work begins.
+`Football.Simulation.Persistence.Sqlite` is the Windows MVP SQLite adapter and is deliberately excluded from Unity DLL import. The simulation models remain portable; a Unity-compatible SQLite binding will implement the same persistence boundary when mobile work begins.
 
 ## Dated league seasons
 

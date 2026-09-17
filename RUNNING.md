@@ -3,10 +3,10 @@
 ## Small complete season
 
 ```csharp
-using BeAFootballer.Simulation.Api;
-using BeAFootballer.Simulation.Core;
-using BeAFootballer.Simulation.Data;
-using BeAFootballer.Simulation.Persistence.Sqlite;
+using Football.Simulation.Api;
+using Football.Simulation.Core;
+using Football.Simulation.Data;
+using Football.Simulation.Persistence.Sqlite;
 
 var config = WorldGenerator.Example(seed: 42, teamCount: 10);
 config.StartYear = 2026;
@@ -119,7 +119,7 @@ if (fixture != null)
     var background = api.SimulateBackgroundAsync(fixture.Id);
     // A future IContinuousMatchStrategy starts a host-driven session from input.
     // Until then, fast simulation is also a usable stand-in:
-    var result = new BeAFootballer.Simulation.Match.FastMatchStrategy().Simulate(input);
+    var result = new Football.Simulation.Match.FastMatchStrategy().Simulate(input);
     await background;
     await api.CompleteInteractiveAsync(result);
     await api.AdvanceDaysAsync(1); // Finish this date and move to the next.
@@ -219,7 +219,7 @@ var changes = api.WorldHistory(fromDay, toDay, personId: "team-1-player-1");
 
 // Disabled by default. Integer 74 means a display rating of 7.4/10.
 var ratedApi = new SimulationApi(store,
-    match: new BeAFootballer.Simulation.Match.FastMatchStrategy(calculatePlayerRatings: true));
+    match: new Football.Simulation.Match.FastMatchStrategy(calculatePlayerRatings: true));
 // Use only one coordinator instance actively per save.
 ```
 
@@ -299,9 +299,9 @@ to that game/session, not to new sponsor/training/gameplay enums in Core.
 From the repository root:
 
 ```powershell
-dotnet run --project src/Footballer.Simulation.Cli -- create career.db 10 42
-dotnet run --project src/Footballer.Simulation.Cli -- resume career.db
-dotnet test Footballer.Simulation.sln
+dotnet run --project src/Football.Simulation.Cli -- create career.db 10 42
+dotnet run --project src/Football.Simulation.Cli -- resume career.db
+dotnet test Football.Simulation.sln
 ```
 
 The console only calls the shared API. See `SimulationIntegrationTests.cs` for small complete seasons,

@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework></PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Footballer.Simulation.Api\Footballer.Simulation.Api.csproj" />
-    <ProjectReference Include="..\Footballer.Simulation.Persistence.Sqlite\Footballer.Simulation.Persistence.Sqlite.csproj" />
-  </ItemGroup>
-</Project>

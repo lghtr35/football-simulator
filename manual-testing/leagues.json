@@ -1,0 +1,850 @@
+[
+  {
+    "id": "premier",
+    "name": "Premier League",
+    "prize": 5000000,
+    "overall": 82,
+    "teams": [
+      {
+        "name": "Arsenal",
+        "capacity": 60704
+      },
+      {
+        "name": "Aston Villa",
+        "capacity": 36887
+      },
+      {
+        "name": "Bournemouth",
+        "capacity": 12357
+      },
+      {
+        "name": "Brentford",
+        "capacity": 17250
+      },
+      {
+        "name": "Brighton & Hove Albion",
+        "capacity": 32176
+      },
+      {
+        "name": "Chelsea",
+        "capacity": 40044
+      },
+      {
+        "name": "Coventry City",
+        "capacity": 32609
+      },
+      {
+        "name": "Crystal Palace",
+        "capacity": 25194
+      },
+      {
+        "name": "Everton",
+        "capacity": 52769
+      },
+      {
+        "name": "Fulham",
+        "capacity": 28107
+      },
+      {
+        "name": "Hull City",
+        "capacity": 24983
+      },
+      {
+        "name": "Ipswich Town",
+        "capacity": 30056
+      },
+      {
+        "name": "Leeds United",
+        "capacity": 37633
+      },
+      {
+        "name": "Liverpool",
+        "capacity": 61276
+      },
+      {
+        "name": "Manchester City",
+        "capacity": 61038
+      },
+      {
+        "name": "Manchester United",
+        "capacity": 74158
+      },
+      {
+        "name": "Newcastle United",
+        "capacity": 52729
+      },
+      {
+        "name": "Nottingham Forest",
+        "capacity": 31212
+      },
+      {
+        "name": "Sunderland",
+        "capacity": 48095
+      },
+      {
+        "name": "Tottenham Hotspur",
+        "capacity": 62850
+      }
+    ]
+  },
+  {
+    "id": "championship",
+    "name": "Championship",
+    "prize": 500000,
+    "overall": 70,
+    "teams": [
+      {
+        "name": "Birmingham City",
+        "capacity": 29409
+      },
+      {
+        "name": "Blackburn Rovers",
+        "capacity": 31367
+      },
+      {
+        "name": "Bolton Wanderers",
+        "capacity": 28723
+      },
+      {
+        "name": "Bristol City",
+        "capacity": 26462
+      },
+      {
+        "name": "Burnley",
+        "capacity": 21990
+      },
+      {
+        "name": "Cardiff City",
+        "capacity": 33280
+      },
+      {
+        "name": "Charlton Athletic",
+        "capacity": 27111
+      },
+      {
+        "name": "Derby County",
+        "capacity": 33597
+      },
+      {
+        "name": "Lincoln City",
+        "capacity": 11400
+      },
+      {
+        "name": "Middlesbrough",
+        "capacity": 34742
+      },
+      {
+        "name": "Millwall",
+        "capacity": 20146
+      },
+      {
+        "name": "Norwich City",
+        "capacity": 27359
+      },
+      {
+        "name": "Portsmouth",
+        "capacity": 20867
+      },
+      {
+        "name": "Preston North End",
+        "capacity": 23408
+      },
+      {
+        "name": "Queens Park Rangers",
+        "capacity": 18439
+      },
+      {
+        "name": "Sheffield United",
+        "capacity": 32050
+      },
+      {
+        "name": "Southampton",
+        "capacity": 32384
+      },
+      {
+        "name": "Stoke City",
+        "capacity": 30089
+      },
+      {
+        "name": "Swansea City",
+        "capacity": 21088
+      },
+      {
+        "name": "Watford",
+        "capacity": 22200
+      },
+      {
+        "name": "West Bromwich Albion",
+        "capacity": 26850
+      },
+      {
+        "name": "West Ham United",
+        "capacity": 62500
+      },
+      {
+        "name": "Wolverhampton Wanderers",
+        "capacity": 31750
+      },
+      {
+        "name": "Wrexham",
+        "capacity": 10771
+      }
+    ]
+  },
+  {
+    "id": "ligue-1",
+    "name": "Ligue 1",
+    "prize": 2500000,
+    "overall": 76,
+    "teams": [
+      {
+        "name": "Angers",
+        "capacity": 18752
+      },
+      {
+        "name": "Auxerre",
+        "capacity": 21379
+      },
+      {
+        "name": "Brest",
+        "capacity": 15931
+      },
+      {
+        "name": "Le Havre",
+        "capacity": 25178
+      },
+      {
+        "name": "Le Mans",
+        "capacity": 25000
+      },
+      {
+        "name": "Lens",
+        "capacity": 37705
+      },
+      {
+        "name": "Lille",
+        "capacity": 50186
+      },
+      {
+        "name": "Lorient",
+        "capacity": 18890
+      },
+      {
+        "name": "Lyon",
+        "capacity": 59186
+      },
+      {
+        "name": "Marseille",
+        "capacity": 67394
+      },
+      {
+        "name": "Monaco",
+        "capacity": 18523
+      },
+      {
+        "name": "Nice",
+        "capacity": 35624
+      },
+      {
+        "name": "Paris FC",
+        "capacity": 20000
+      },
+      {
+        "name": "Paris Saint-Germain",
+        "capacity": 47926
+      },
+      {
+        "name": "Rennes",
+        "capacity": 29778
+      },
+      {
+        "name": "Strasbourg",
+        "capacity": 29230
+      },
+      {
+        "name": "Toulouse",
+        "capacity": 33150
+      },
+      {
+        "name": "Troyes",
+        "capacity": 20400
+      }
+    ]
+  },
+  {
+    "id": "bundesliga",
+    "name": "Bundesliga",
+    "prize": 3000000,
+    "overall": 78,
+    "teams": [
+      {
+        "name": "1. FC Köln",
+        "capacity": 49698
+      },
+      {
+        "name": "Bayer Leverkusen",
+        "capacity": 30210
+      },
+      {
+        "name": "Bayern Munich",
+        "capacity": 75000
+      },
+      {
+        "name": "Borussia Dortmund",
+        "capacity": 81365
+      },
+      {
+        "name": "Borussia Mönchengladbach",
+        "capacity": 54057
+      },
+      {
+        "name": "Eintracht Frankfurt",
+        "capacity": 59500
+      },
+      {
+        "name": "FC Augsburg",
+        "capacity": 30660
+      },
+      {
+        "name": "Hamburger SV",
+        "capacity": 57000
+      },
+      {
+        "name": "Mainz 05",
+        "capacity": 33305
+      },
+      {
+        "name": "RB Leipzig",
+        "capacity": 47800
+      },
+      {
+        "name": "SC Freiburg",
+        "capacity": 34700
+      },
+      {
+        "name": "SC Paderborn",
+        "capacity": 15000
+      },
+      {
+        "name": "Schalke 04",
+        "capacity": 62271
+      },
+      {
+        "name": "SV Elversberg",
+        "capacity": 10000
+      },
+      {
+        "name": "TSG Hoffenheim",
+        "capacity": 30150
+      },
+      {
+        "name": "Union Berlin",
+        "capacity": 22012
+      },
+      {
+        "name": "VfB Stuttgart",
+        "capacity": 60058
+      },
+      {
+        "name": "Werder Bremen",
+        "capacity": 42100
+      }
+    ]
+  },
+  {
+    "id": "la-liga",
+    "name": "La Liga",
+    "prize": 4000000,
+    "overall": 80,
+    "teams": [
+      {
+        "name": "Alavés",
+        "capacity": 19840
+      },
+      {
+        "name": "Athletic Bilbao",
+        "capacity": 53289
+      },
+      {
+        "name": "Atlético Madrid",
+        "capacity": 70692
+      },
+      {
+        "name": "Barcelona",
+        "capacity": 105000
+      },
+      {
+        "name": "Celta Vigo",
+        "capacity": 24870
+      },
+      {
+        "name": "Deportivo A Coruña",
+        "capacity": 32660
+      },
+      {
+        "name": "Elche",
+        "capacity": 31388
+      },
+      {
+        "name": "Espanyol",
+        "capacity": 37776
+      },
+      {
+        "name": "Getafe",
+        "capacity": 16500
+      },
+      {
+        "name": "Levante",
+        "capacity": 26354
+      },
+      {
+        "name": "Málaga",
+        "capacity": 30044
+      },
+      {
+        "name": "Osasuna",
+        "capacity": 23576
+      },
+      {
+        "name": "Racing Santander",
+        "capacity": 22308
+      },
+      {
+        "name": "Rayo Vallecano",
+        "capacity": 14500
+      },
+      {
+        "name": "Real Betis",
+        "capacity": 70000
+      },
+      {
+        "name": "Real Madrid",
+        "capacity": 83186
+      },
+      {
+        "name": "Real Sociedad",
+        "capacity": 39313
+      },
+      {
+        "name": "Sevilla",
+        "capacity": 43883
+      },
+      {
+        "name": "Valencia",
+        "capacity": 49430
+      },
+      {
+        "name": "Villarreal",
+        "capacity": 23008
+      }
+    ]
+  },
+  {
+    "id": "serie-a",
+    "name": "Serie A",
+    "prize": 3500000,
+    "overall": 78,
+    "teams": [
+      {
+        "name": "AC Milan",
+        "capacity": 75710
+      },
+      {
+        "name": "Atalanta",
+        "capacity": 23439
+      },
+      {
+        "name": "Bologna",
+        "capacity": 38279
+      },
+      {
+        "name": "Cagliari",
+        "capacity": 16416
+      },
+      {
+        "name": "Como",
+        "capacity": 13602
+      },
+      {
+        "name": "Fiorentina",
+        "capacity": 43118
+      },
+      {
+        "name": "Frosinone",
+        "capacity": 16227
+      },
+      {
+        "name": "Genoa",
+        "capacity": 33205
+      },
+      {
+        "name": "Inter Milan",
+        "capacity": 75710
+      },
+      {
+        "name": "Juventus",
+        "capacity": 41507
+      },
+      {
+        "name": "Lazio",
+        "capacity": 70634
+      },
+      {
+        "name": "Lecce",
+        "capacity": 30354
+      },
+      {
+        "name": "Monza",
+        "capacity": 17102
+      },
+      {
+        "name": "Napoli",
+        "capacity": 54732
+      },
+      {
+        "name": "Parma",
+        "capacity": 22352
+      },
+      {
+        "name": "Roma",
+        "capacity": 70634
+      },
+      {
+        "name": "Sassuolo",
+        "capacity": 21515
+      },
+      {
+        "name": "Torino",
+        "capacity": 28177
+      },
+      {
+        "name": "Udinese",
+        "capacity": 25132
+      },
+      {
+        "name": "Venezia",
+        "capacity": 12048
+      }
+    ]
+  },
+  {
+    "id": "super-lig",
+    "name": "Süper Lig",
+    "prize": 800000,
+    "overall": 70,
+    "teams": [
+      {
+        "name": "Alanyaspor",
+        "capacity": 9789
+      },
+      {
+        "name": "Amedspor",
+        "capacity": 30480
+      },
+      {
+        "name": "Başakşehir",
+        "capacity": 17067
+      },
+      {
+        "name": "Beşiktaş",
+        "capacity": 42684
+      },
+      {
+        "name": "Erzurumspor",
+        "capacity": 20347
+      },
+      {
+        "name": "Eyüpspor",
+        "capacity": 13797
+      },
+      {
+        "name": "Fenerbahçe",
+        "capacity": 47911
+      },
+      {
+        "name": "Galatasaray",
+        "capacity": 53387
+      },
+      {
+        "name": "Gaziantep",
+        "capacity": 30320
+      },
+      {
+        "name": "Gençlerbirliği",
+        "capacity": 20672
+      },
+      {
+        "name": "Göztepe",
+        "capacity": 23376
+      },
+      {
+        "name": "Kasımpaşa",
+        "capacity": 13797
+      },
+      {
+        "name": "Kocaelispor",
+        "capacity": 34829
+      },
+      {
+        "name": "Konyaspor",
+        "capacity": 41135
+      },
+      {
+        "name": "Rizespor",
+        "capacity": 14879
+      },
+      {
+        "name": "Samsunspor",
+        "capacity": 34346
+      },
+      {
+        "name": "Trabzonspor",
+        "capacity": 41061
+      },
+      {
+        "name": "Çorum",
+        "capacity": 13119
+      }
+    ]
+  },
+  {
+    "id": "primeira",
+    "name": "Primeira Liga",
+    "prize": 1200000,
+    "overall": 72,
+    "teams": [
+      {
+        "name": "Académico de Viseu",
+        "capacity": 6912
+      },
+      {
+        "name": "Alverca",
+        "capacity": 6932
+      },
+      {
+        "name": "Arouca",
+        "capacity": 5000
+      },
+      {
+        "name": "Benfica",
+        "capacity": 68100
+      },
+      {
+        "name": "Braga",
+        "capacity": 30286
+      },
+      {
+        "name": "Casa Pia",
+        "capacity": 7000
+      },
+      {
+        "name": "Estoril Praia",
+        "capacity": 5094
+      },
+      {
+        "name": "Estrela da Amadora",
+        "capacity": 9288
+      },
+      {
+        "name": "Famalicão",
+        "capacity": 5186
+      },
+      {
+        "name": "Gil Vicente",
+        "capacity": 12046
+      },
+      {
+        "name": "Marítimo",
+        "capacity": 10600
+      },
+      {
+        "name": "Moreirense",
+        "capacity": 6150
+      },
+      {
+        "name": "Nacional",
+        "capacity": 5200
+      },
+      {
+        "name": "Porto",
+        "capacity": 50033
+      },
+      {
+        "name": "Rio Ave",
+        "capacity": 5300
+      },
+      {
+        "name": "Santa Clara",
+        "capacity": 12500
+      },
+      {
+        "name": "Sporting CP",
+        "capacity": 52095
+      },
+      {
+        "name": "Vitória de Guimarães",
+        "capacity": 30029
+      }
+    ]
+  },
+  {
+    "id": "pro-league",
+    "name": "Belgian Pro League",
+    "prize": 600000,
+    "overall": 68,
+    "teams": [
+      {
+        "name": "Anderlecht",
+        "capacity": 21500
+      },
+      {
+        "name": "Antwerp",
+        "capacity": 21000
+      },
+      {
+        "name": "Beveren",
+        "capacity": 8190
+      },
+      {
+        "name": "Cercle Brugge",
+        "capacity": 29042
+      },
+      {
+        "name": "Charleroi",
+        "capacity": 14000
+      },
+      {
+        "name": "Club Brugge",
+        "capacity": 29042
+      },
+      {
+        "name": "Genk",
+        "capacity": 24956
+      },
+      {
+        "name": "Gent",
+        "capacity": 20000
+      },
+      {
+        "name": "Kortrijk",
+        "capacity": 9399
+      },
+      {
+        "name": "La Louvière",
+        "capacity": 8050
+      },
+      {
+        "name": "Lommel SK",
+        "capacity": 8000
+      },
+      {
+        "name": "Mechelen",
+        "capacity": 16700
+      },
+      {
+        "name": "OH Leuven",
+        "capacity": 10000
+      },
+      {
+        "name": "Sint-Truiden",
+        "capacity": 14600
+      },
+      {
+        "name": "Standard Liège",
+        "capacity": 30023
+      },
+      {
+        "name": "Union SG",
+        "capacity": 9400
+      },
+      {
+        "name": "Westerlo",
+        "capacity": 8035
+      },
+      {
+        "name": "Zulte Waregem",
+        "capacity": 12500
+      }
+    ]
+  },
+  {
+    "id": "eredivisie",
+    "name": "Eredivisie",
+    "prize": 900000,
+    "overall": 72,
+    "teams": [
+      {
+        "name": "ADO Den Haag",
+        "capacity": 15000
+      },
+      {
+        "name": "Ajax",
+        "capacity": 55865
+      },
+      {
+        "name": "AZ",
+        "capacity": 19478
+      },
+      {
+        "name": "Cambuur",
+        "capacity": 15000
+      },
+      {
+        "name": "Excelsior",
+        "capacity": 4500
+      },
+      {
+        "name": "Feyenoord",
+        "capacity": 47500
+      },
+      {
+        "name": "Fortuna Sittard",
+        "capacity": 12000
+      },
+      {
+        "name": "Go Ahead Eagles",
+        "capacity": 10000
+      },
+      {
+        "name": "Groningen",
+        "capacity": 22550
+      },
+      {
+        "name": "Heerenveen",
+        "capacity": 26100
+      },
+      {
+        "name": "N.E.C.",
+        "capacity": 12650
+      },
+      {
+        "name": "PEC Zwolle",
+        "capacity": 14000
+      },
+      {
+        "name": "PSV",
+        "capacity": 35000
+      },
+      {
+        "name": "Sparta Rotterdam",
+        "capacity": 11026
+      },
+      {
+        "name": "Telstar",
+        "capacity": 5338
+      },
+      {
+        "name": "Twente",
+        "capacity": 30205
+      },
+      {
+        "name": "Utrecht",
+        "capacity": 23750
+      },
+      {
+        "name": "Willem II",
+        "capacity": 15220
+      }
+    ]
+  }
+]
