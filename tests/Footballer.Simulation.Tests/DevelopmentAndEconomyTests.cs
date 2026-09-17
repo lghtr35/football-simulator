@@ -126,6 +126,21 @@ namespace BeAFootballer.Simulation.Tests
             Assert.That(store.IsMarketDayComplete(yesterday), Is.True);
             Assert.That(new SimulationApi(new SqlitePlaythroughStore(path)).TeamBalance("team-1"), Is.EqualTo(balance));
             Assert.That(Scalar("SELECT COUNT(*) FROM WorldHistory;"), Is.EqualTo(historyCount));
+            Assert.That(Scalar("SELECT COUNT(*) FROM WorldHistory WHERE Type='cashflow';"), Is.Zero);
+        }
+
+        [Test] public async Task IdleMarketAppliesCashWithoutContractRewritesOrCashflowHistory()
+        {
+            var config = WorldGenerator.Example(11, 2);
+            config.Rules.TransferWindows.Clear();
+            var api = SimulationApi.Create(store, config);
+            var start = api.TeamBalance("team-1");
+            await api.AdvanceDaysAsync(1);
+            Assert.That(api.TeamBalance("team-1"), Is.Not.EqualTo(start));
+            Assert.That(Scalar("SELECT COUNT(*) FROM WorldHistory WHERE Type='cashflow';"), Is.Zero);
+            var yesterday = store.LoadMetadata().CurrentDay - 1;
+            Assert.That(store.IsMarketDayComplete(yesterday), Is.True);
+            Assert.That(store.LoadLifePage(null, 10, yesterday), Is.Empty);
         }
 
         [Test] public void TransferWindowsCapsBudgetsAndContractsAreRespected()

@@ -104,7 +104,8 @@ FROM Teams t LEFT JOIN TeamRuntime s ON s.TeamId=t.Id LEFT JOIN LeagueSquadRules
 p.WeightKilograms,p.Nationality,p.Speed,p.Acceleration,p.Stamina,p.StaminaRegen,p.Dribbling,p.FirstTouchControl,
 p.HitPower,p.Accuracy,p.Tackling,p.Strength,COALESCE(q.Overall,65),COALESCE(q.Goalkeeping,50),
 s.LastUpdatedDay,s.Morale,s.Fitness,s.Fatigue,s.RecentMatchRating,s.Availability,s.InjuryDaysRemaining,s.SuspensionMatchesRemaining,
-COALESCE(x.Appearances,0),COALESCE(x.Minutes,0),COALESCE(x.Goals,0),COALESCE(x.Assists,0),COALESCE(x.YellowCards,0),COALESCE(x.RedCards,0),COALESCE(d.Form,50),COALESCE(x.Starts,0)
+COALESCE(x.Appearances,0),COALESCE(x.Minutes,0),COALESCE(x.Goals,0),COALESCE(x.Assists,0),COALESCE(x.YellowCards,0),COALESCE(x.RedCards,0),COALESCE(d.Form,50),COALESCE(x.Starts,0),
+COALESCE(d.BirthDay,0),(SELECT CurrentDay FROM PlaythroughMetadata)
 FROM Footballers p JOIN FootballerState s ON s.FootballerId=p.Id
 LEFT JOIN PlayerRatings q ON q.FootballerId=p.Id LEFT JOIN PlayerTotals x ON x.FootballerId=p.Id
 LEFT JOIN DevelopmentData d ON d.FootballerId=p.Id
@@ -113,8 +114,7 @@ WHERE p.TeamId IN (" + ids + ") ORDER BY p.Id;";
                     while (r.Read())
                     {
                         var definition = ReadFootballer(r);
-                        definition.Overall = r.GetInt32(19);
-                        definition.Skills.Goalkeeping = r.GetInt32(20);
+                        ApplyDerivedAbility(definition, r.GetInt32(20), r.GetInt32(37), r.GetInt32(38));
                         teams[definition.TeamId].Players.Add(new PlayerSnapshot { Definition = definition,
                             State = new FootballerState { FootballerId = definition.Id, LastUpdatedDay = r.GetInt32(21),
                                 Form = new FootballerForm { Morale = r.GetInt32(22), Fitness = r.GetInt32(23), Fatigue = r.GetInt32(24),
@@ -131,7 +131,7 @@ WHERE p.TeamId IN (" + ids + ") ORDER BY p.Id;";
 
         public List<LeagueTableEntry> LoadStandings(string seasonId)
         {
-            using (var c = OpenConnection()) return ReadStandings(c, null, seasonId);
+            using (var c = OpenConnection()) return ReadStandings(c.Connection, null, seasonId);
         }
 
         private static List<LeagueTableEntry> ReadStandings(SqliteConnection c, SqliteTransaction transaction, string id)

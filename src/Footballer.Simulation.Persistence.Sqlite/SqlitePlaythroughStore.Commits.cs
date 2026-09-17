@@ -136,6 +136,8 @@ JOIN SeasonFixtures s ON s.FixtureId=f.Id WHERE s.SeasonId=$id;";
             }
         }
 
+        private static void CheckDay(SqliteSession c, SqliteTransaction tx, int day) => CheckDay(c.Connection, tx, day);
+
         private static void CheckDay(SqliteConnection c, SqliteTransaction tx, int day)
         {
             using (var command = c.CreateCommand())

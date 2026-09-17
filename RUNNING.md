@@ -42,6 +42,9 @@ Season starts on day one of its start month and ends on the last day of its end 
 An end month before the start month means the following year. Equal months mean the same month/year.
 The generator rejects dates too short for its five-day minimum. Each league has its own months;
 the world starts at the earliest league start. All dates use the fixed 365-day calendar.
+Double-round-robin rounds sit on a 5–7 day interval. Leftover days become a deterministic per-fixture
+jitter (keyed by league and season id) so a round is not forced onto one date. A team’s own matches
+stay at least five days apart.
 
 ## Resume and inspect
 
@@ -143,14 +146,20 @@ The host must await CompleteInteractiveAsync before advancing the date.
 - Fixtures: register `ISeasonFixtureStrategy` implementations in `SeasonFixtureGenerator`, passed to Create.
   League configuration selects the default; `SeasonFixtureStrategyId` overrides it for the generated season.
 - Life: inject `IDailyLifeStrategy` for per-player daily recovery and `IPlayerDevelopmentStrategy` for
-  periodic training/ageing. Core processes every player, including free agents, in WorldPageSize-sized
-  pages (default 128). Each committed page is checkpointed for safe resume.
+  periodic training/ageing. Fully recovered players (no fatigue, full fitness, no injury or ban) are
+  date-stamped in one UPDATE. Core pages only the rest, including free agents, in WorldPageSize-sized
+  pages (default 128). Each committed page is checkpointed for safe resume. A world tick reuses one
+  SQLite writer connection for life, development and market; match commits still open their own.
 - Career: inject `ISeasonCompletionStrategy` for awards; basic match consequences update player/team state.
-  `ITransferStrategy` handles deterministic contract, transfer and daily cashflow decisions.
+  `ITransferStrategy` handles deterministic contract, transfer and daily cashflow decisions. Cashflow
+  updates club balances but is not written to WorldHistory. Days with no expiring contracts and no
+  open-window transfer tick apply cash in SQL without loading the market snapshot.
 
 Core owns daily progression and orchestration. It pages fixtures, loads a bounded batch of teams with
-set-based SQL queries, simulates separate snapshots on bounded workers, and commits in fixture order.
-Seeds derive from the saved world seed and fixture ID, never task ordering or process-specific hash codes.
+set-based SQL queries, simulates separate snapshots concurrently, and commits in fixture order.
+Fast-match work is awaited together under `MaxParallelMatches` (`IAsyncMatchSimulationStrategy` when
+the strategy provides it; otherwise `Task.Run` around `Simulate`). Seeds derive from the saved world
+seed and fixture ID, never task ordering or process-specific hash codes.
 Worker count is limited by CPU reserve, profile cap and estimated memory capacity. Loaded batch size is
 also limited by that estimate. This is admission control, not a hard memory/CPU quota; tune estimates by profiling.
 Background mode uses its smaller worker cap and holds the selected fixture/date open.
@@ -199,8 +208,9 @@ indebted clubs cannot make new signings. Initial authored squads are not automat
 Younger players have greater growth probability. Training intensity, match minutes since the last
 development tick and performance form raise growth and reduce age-related decline; neither outcome is
 guaranteed. A tick can change one skill by one point, bounded to 1–100. Overall is derived from positional
-skills. Age advances on the initial-save anniversary in this MVP. Ratings and development/form RNG are
-independent: disabling match ratings does not change future results or development.
+skills on load; `PlayerRatings.Overall` is a cache written only when a skill actually changes.
+Age is derived from birth day and the current calendar day when a player is loaded.
+Ratings and development/form RNG are independent: disabling match ratings does not change future results or development.
 
 ```csharp
 api.SetTraining("team-1-player-1", 80);
@@ -214,7 +224,8 @@ var ratedApi = new SimulationApi(store,
 ```
 
 WorldHistory returns at most 1000 newest entries in a date range; narrow the range/person for longer histories.
-Daily cashflows, transfers, renewals/releases and actual skill changes are persisted transactionally.
+Transfers, renewals/releases and actual skill changes are persisted transactionally. Daily cash is applied
+to club balances without a per-club history row.
 The compact market snapshot currently covers the whole world: match memory admission limits do not cap
 that snapshot. For very large worlds, replace the MVP market scan with indexed candidate queries.
 
@@ -229,7 +240,8 @@ and a detailed training activity UI are deferred.
 
 The simulation does not define sponsor offers, relationships, shopping, manager menus, decision IDs,
 delegation buttons, or game-save formats. It exposes neutral boundaries through `SimulationHooks`:
-`BeforeDay`, `BeforeLife`, `BeforeDevelopment`, `BeforeMarket`, `BeforeMatch`, and `AfterSeasonCompletion`.
+`BeforeDay`, `BeforeLife` (only players who still need recovery), `BeforeDevelopment`, `BeforeMarket`
+(skipped on idle cash-only market days), `BeforeMatch`, and `AfterSeasonCompletion`.
 The game decides which boundaries matter, whether an actor needs input, and how to save that input.
 
 ```csharp

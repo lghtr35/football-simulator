@@ -129,7 +129,8 @@ namespace BeAFootballer.Simulation.Tests
             public System.Collections.Generic.IReadOnlyList<Fixture> Generate(LeagueSeason season)
             {
                 var fixtures = new DoubleRoundRobinStrategy().Generate(season).ToList();
-                if (season.StartDate.Year > 2026 && Fail) fixtures[0].ScheduledDay--;
+                if (season.StartDate.Year > 2026 && Fail)
+                    fixtures[0].ScheduledDay = SimulationCalendar.DayFromDate(season.StartDate) - 1;
                 return fixtures;
             }
         }

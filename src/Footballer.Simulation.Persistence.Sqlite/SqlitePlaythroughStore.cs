@@ -13,11 +13,19 @@ namespace BeAFootballer.Simulation.Persistence.Sqlite
     public sealed partial class SqlitePlaythroughStore : IPlaythroughStore, IWorldEvolutionStore
     {
         private readonly string databasePath;
+        private SqliteConnection worldTick;
 
         public SqlitePlaythroughStore(string databasePath)
         {
             if (string.IsNullOrWhiteSpace(databasePath)) throw new ArgumentException("A database path is required.", "databasePath");
             this.databasePath = Path.GetFullPath(databasePath);
+        }
+
+        public IDisposable BeginWorldTick()
+        {
+            if (worldTick != null) throw new InvalidOperationException("A world tick is already open.");
+            worldTick = CreateConnection();
+            return new WorldTickScope(this);
         }
 
         public void Initialise()
@@ -94,19 +102,63 @@ namespace BeAFootballer.Simulation.Persistence.Sqlite
             using (var connection = OpenConnection())
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = "SELECT Id, Name, TeamId, Position, PreferredFoot, Age, HeightCentimetres, WeightKilograms, Nationality, Speed, Acceleration, Stamina, StaminaRegen, Dribbling, FirstTouchControl, HitPower, Accuracy, Tackling, Strength FROM Footballers WHERE TeamId = $teamId ORDER BY Id;";
+                command.CommandText = @"SELECT p.Id, p.Name, p.TeamId, p.Position, p.PreferredFoot, p.Age, p.HeightCentimetres, p.WeightKilograms, p.Nationality, p.Speed, p.Acceleration, p.Stamina, p.StaminaRegen, p.Dribbling, p.FirstTouchControl, p.HitPower, p.Accuracy, p.Tackling, p.Strength,
+COALESCE(q.Goalkeeping,50),COALESCE(d.BirthDay,0),(SELECT CurrentDay FROM PlaythroughMetadata)
+FROM Footballers p LEFT JOIN PlayerRatings q ON q.FootballerId=p.Id LEFT JOIN DevelopmentData d ON d.FootballerId=p.Id
+WHERE p.TeamId = $teamId ORDER BY p.Id;";
                 command.Parameters.AddWithValue("$teamId", teamId);
-                using (var reader = command.ExecuteReader()) while (reader.Read()) footballers.Add(ReadFootballer(reader));
+                using (var reader = command.ExecuteReader()) while (reader.Read())
+                {
+                    var footballer = ReadFootballer(reader);
+                    ApplyDerivedAbility(footballer, reader.GetInt32(19), reader.GetInt32(20), reader.GetInt32(21));
+                    footballers.Add(footballer);
+                }
             }
             return footballers;
         }
 
-        private SqliteConnection OpenConnection()
+        private SqliteConnection CreateConnection()
         {
             var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = databasePath, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = false }.ToString());
             connection.Open();
             using (var command = connection.CreateCommand()) { command.CommandText = "PRAGMA foreign_keys = ON;"; command.ExecuteNonQuery(); }
             return connection;
+        }
+
+        private SqliteSession OpenConnection()
+        {
+            if (worldTick != null) return new SqliteSession(worldTick, false);
+            return new SqliteSession(CreateConnection(), true);
+        }
+
+        private static void ApplyDerivedAbility(FootballerDefinition player, int goalkeeping, int birthDay, int currentDay)
+        {
+            player.Skills.Goalkeeping = goalkeeping;
+            player.Overall = PlayerAbility.Overall(player);
+            player.Attributes.Age = Math.Max(0, (currentDay - birthDay) / SimulationCalendar.DaysPerYear);
+        }
+
+        private sealed class SqliteSession : IDisposable
+        {
+            public readonly SqliteConnection Connection;
+            private readonly bool owns;
+            public SqliteSession(SqliteConnection connection, bool owns) { Connection = connection; this.owns = owns; }
+            public SqliteCommand CreateCommand() => Connection.CreateCommand();
+            public SqliteTransaction BeginTransaction() => Connection.BeginTransaction();
+            public SqliteTransaction BeginTransaction(bool deferred) => Connection.BeginTransaction(deferred);
+            public static implicit operator SqliteConnection(SqliteSession session) => session.Connection;
+            public void Dispose() { if (owns) Connection.Dispose(); }
+        }
+
+        private sealed class WorldTickScope : IDisposable
+        {
+            private readonly SqlitePlaythroughStore store;
+            public WorldTickScope(SqlitePlaythroughStore store) { this.store = store; }
+            public void Dispose()
+            {
+                store.worldTick?.Dispose();
+                store.worldTick = null;
+            }
         }
 
         private static void InsertMetadata(SqliteConnection connection, SqliteTransaction transaction, PlaythroughMetadata value)
@@ -146,6 +198,9 @@ namespace BeAFootballer.Simulation.Persistence.Sqlite
                 Skills = new FootballerSkills { Speed = reader.GetInt32(9), Acceleration = reader.GetInt32(10), Stamina = reader.GetInt32(11), StaminaRegen = reader.GetInt32(12), Dribbling = reader.GetInt32(13), FirstTouchControl = reader.GetInt32(14), HitPower = reader.GetInt32(15), Accuracy = reader.GetInt32(16), Tackling = reader.GetInt32(17), Strength = reader.GetInt32(18) }
             };
         }
+
+        private static void Execute(SqliteSession connection, SqliteTransaction transaction, string sql, params object[] parameterPairs) =>
+            Execute(connection.Connection, transaction, sql, parameterPairs);
 
         private static void Execute(SqliteConnection connection, SqliteTransaction transaction, string sql, params object[] parameterPairs)
         {

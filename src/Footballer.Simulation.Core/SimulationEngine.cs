@@ -236,17 +236,7 @@ namespace BeAFootballer.Simulation.Core
                 }
                 if (fixtures.Count == 0) return total;
                 var inputs = prepared.ToArray();
-                var results = new MatchResult[fixtures.Count];
-                await Task.Run(() => Parallel.For(0, fixtures.Count, new ParallelOptions { MaxDegreeOfParallelism = limits.Workers, CancellationToken = token }, i =>
-                {
-                    var fixture = fixtures[i];
-                    var input = inputs[i];
-                    var result = match.Simulate(input, token);
-                    if (result.FixtureId != fixture.Id) throw new InvalidOperationException("Strategy returned another fixture.");
-                    ValidatePlayers(input, result);
-                    MatchConsequences.Apply(input, result);
-                    results[i] = result;
-                }), token).ConfigureAwait(false);
+                var results = await SimulateMatchesAsync(fixtures, inputs, limits.Workers, token).ConfigureAwait(false);
                 token.ThrowIfCancellationRequested();
                 ThrowIfEnded();
                 // Fixture order, never worker completion order, determines commit order.
@@ -255,55 +245,91 @@ namespace BeAFootballer.Simulation.Core
             }
         }
 
+        private async Task<MatchResult[]> SimulateMatchesAsync(IReadOnlyList<Fixture> fixtures,
+            MatchInput[] inputs, int workers, CancellationToken token)
+        {
+            var gate = new SemaphoreSlim(Math.Max(1, workers));
+            var asyncMatch = match as IAsyncMatchSimulationStrategy;
+            var tasks = new Task<MatchResult>[fixtures.Count];
+            for (var i = 0; i < fixtures.Count; i++)
+                tasks[i] = Run(i);
+            try { return await Task.WhenAll(tasks).ConfigureAwait(false); }
+            finally { gate.Dispose(); }
+
+            async Task<MatchResult> Run(int index)
+            {
+                await gate.WaitAsync(token).ConfigureAwait(false);
+                try
+                {
+                    token.ThrowIfCancellationRequested();
+                    var fixture = fixtures[index];
+                    var input = inputs[index];
+                    var result = asyncMatch != null
+                        ? await asyncMatch.SimulateAsync(input, token).ConfigureAwait(false)
+                        : await Task.Run(() => match.Simulate(input, token), token).ConfigureAwait(false);
+                    if (result.FixtureId != fixture.Id) throw new InvalidOperationException("Strategy returned another fixture.");
+                    ValidatePlayers(input, result);
+                    MatchConsequences.Apply(input, result);
+                    return result;
+                }
+                finally { gate.Release(); }
+            }
+        }
+
         private void AdvanceWorld(PlaythroughMetadata metadata, CancellationToken token)
         {
-            ThrowIfEnded();
-            var day = metadata.CurrentDay;
-            if (evolution.IsMarketDayComplete(day)) return;
-            Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeDay, Day = day });
-            ThrowIfEnded();
-            var rules = evolution.LoadWorldRules();
-            rules.Validate();
-            string after = null;
-            while (true)
+            using (evolution.BeginWorldTick())
             {
-                token.ThrowIfCancellationRequested();
-                var page = evolution.LoadLifePage(after, options.WorldPageSize, day);
-                if (page.Count == 0) break;
-                foreach (var player in page)
-                {
-                    Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeLife, Day = day, LifeState = player });
-                    life.Advance(player, day);
-                }
                 ThrowIfEnded();
-                evolution.CommitLife(day, page);
-                after = page[page.Count - 1].FootballerId;
-            }
-            after = null;
-            while (true)
-            {
-                token.ThrowIfCancellationRequested();
-                var page = evolution.LoadDevelopmentPage(after, options.WorldPageSize, day - rules.DevelopmentIntervalDays);
-                if (page.Count == 0) break;
-                var updates = new List<DevelopmentUpdate>();
-                foreach (var player in page)
-                {
-                    player.Definition.IsActor = IsActor(PersonKind.Player, player.Definition.Id);
-                    Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeDevelopment, Day = day, Development = player });
-                    var update = development.Advance(player, day, rules, metadata.Seed);
-                    if (update != null) updates.Add(update);
-                }
+                var day = metadata.CurrentDay;
+                if (evolution.IsMarketDayComplete(day)) return;
+                Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeDay, Day = day });
                 ThrowIfEnded();
-                evolution.CommitDevelopment(day, updates);
-                after = page[page.Count - 1].Definition.Id;
+                var rules = evolution.LoadWorldRules();
+                rules.Validate();
+                evolution.StampStableLife(day);
+                string after = null;
+                while (true)
+                {
+                    token.ThrowIfCancellationRequested();
+                    var page = evolution.LoadLifePage(after, options.WorldPageSize, day);
+                    if (page.Count == 0) break;
+                    foreach (var player in page)
+                    {
+                        Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeLife, Day = day, LifeState = player });
+                        life.Advance(player, day);
+                    }
+                    ThrowIfEnded();
+                    evolution.CommitLife(day, page);
+                    after = page[page.Count - 1].FootballerId;
+                }
+                after = null;
+                while (true)
+                {
+                    token.ThrowIfCancellationRequested();
+                    var page = evolution.LoadDevelopmentPage(after, options.WorldPageSize, day - rules.DevelopmentIntervalDays);
+                    if (page.Count == 0) break;
+                    var updates = new List<DevelopmentUpdate>();
+                    foreach (var player in page)
+                    {
+                        player.Definition.IsActor = IsActor(PersonKind.Player, player.Definition.Id);
+                        Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeDevelopment, Day = day, Development = player });
+                        var update = development.Advance(player, day, rules, metadata.Seed);
+                        if (update != null) updates.Add(update);
+                    }
+                    ThrowIfEnded();
+                    evolution.CommitDevelopment(day, updates);
+                    after = page[page.Count - 1].Definition.Id;
+                }
+                token.ThrowIfCancellationRequested();
+                if (evolution.TryCommitIdleMarket(day, rules)) return;
+                var market = evolution.LoadMarket();
+                Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeMarket, Day = day, Market = market });
+                ThrowIfEnded();
+                var marketUpdate = transfers.Advance(market, rules, day);
+                ThrowIfEnded();
+                evolution.CommitMarket(day, marketUpdate);
             }
-            token.ThrowIfCancellationRequested();
-            var market = evolution.LoadMarket();
-            Checkpoint(new SimulationCheckpoint { Stage = SimulationStage.BeforeMarket, Day = day, Market = market });
-            ThrowIfEnded();
-            var marketUpdate = transfers.Advance(market, rules, day);
-            ThrowIfEnded();
-            evolution.CommitMarket(day, marketUpdate);
         }
 
         private static void ValidatePlayers(MatchInput input, MatchResult result)

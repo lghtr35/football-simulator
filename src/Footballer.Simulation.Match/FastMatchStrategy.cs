@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using BeAFootballer.Simulation.Data;
 
 namespace BeAFootballer.Simulation.Match
 {
-    public sealed class FastMatchStrategy : IMatchSimulationStrategy
+    public sealed class FastMatchStrategy : IAsyncMatchSimulationStrategy
     {
         public string Id => "fast-v1";
         public SimulationMode Mode => SimulationMode.Discrete;
@@ -15,6 +16,12 @@ namespace BeAFootballer.Simulation.Match
         public FastMatchStrategy(bool calculatePlayerRatings = false)
         {
             CalculatePlayerRatings = calculatePlayerRatings;
+        }
+
+        public Task<MatchResult> SimulateAsync(MatchInput input, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.Run(() => Simulate(input, cancellationToken), cancellationToken);
         }
 
         public MatchResult Simulate(MatchInput input, CancellationToken cancellationToken = default)

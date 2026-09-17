@@ -88,10 +88,13 @@ namespace BeAFootballer.Simulation.Tests
             var input = await api.PrepareInteractiveAsync(fixture.Id);
             Assert.That(input.Home.Lineup, Has.Count.EqualTo(11));
             Assert.That(input.Away.Lineup, Has.Count.EqualTo(11));
+            var otherToday = api.Fixtures(new FixtureFilter
+            {
+                FromDay = day, ToDay = day, IsPlayed = false, ExcludeFixtureId = fixture.Id, Limit = 50
+            }).Count;
             var background = api.SimulateBackgroundAsync(fixture.Id);
-            // Stand-in for a host-driven continuous session using the same prepared input.
             var interactiveResult = new FastMatchStrategy().Simulate(input);
-            Assert.That(await background, Is.EqualTo(1));
+            Assert.That(await background, Is.EqualTo(otherToday));
             Assert.That(store.LoadMetadata().CurrentDay, Is.EqualTo(day));
             Assert.That(api.Fixtures(new FixtureFilter { IsPlayed = false, ToDay = day }), Has.Count.EqualTo(1));
             await api.CompleteInteractiveAsync(interactiveResult);

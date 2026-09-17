@@ -65,6 +65,10 @@ namespace BeAFootballer.Simulation.Data
         public int PositionGroup;
         public long Value;
         public long AskingWage;
+        public bool Tracked;
+        public string LoadedTeamId;
+        public int LoadedEndDay;
+        public long LoadedDailyWage;
     }
     public sealed class ClubFinance
     {
@@ -112,10 +116,13 @@ namespace BeAFootballer.Simulation.Data
     }
     public interface IWorldEvolutionStore
     {
+        IDisposable BeginWorldTick();
         WorldRules LoadWorldRules();
+        void StampStableLife(int day);
         List<FootballerState> LoadLifePage(string afterId, int limit, int day);
         void CommitLife(int day, IReadOnlyList<FootballerState> states);
         bool IsMarketDayComplete(int day);
+        bool TryCommitIdleMarket(int day, WorldRules rules);
         MarketSnapshot LoadMarket();
         void CommitMarket(int day, MarketUpdate update);
         List<DevelopmentPlayer> LoadDevelopmentPage(string afterId, int limit, int throughDay);

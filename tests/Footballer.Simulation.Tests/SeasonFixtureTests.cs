@@ -40,7 +40,7 @@ namespace BeAFootballer.Simulation.Tests
                     Assert.That(fixtures.Count(f => f.HomeTeamId == home && f.AwayTeamId == away), Is.EqualTo(1));
                 var days = fixtures.Where(f => f.HomeTeamId == home || f.AwayTeamId == home)
                     .Select(f => f.ScheduledDay).OrderBy(d => d).ToArray();
-                for (var i = 1; i < days.Length; i++) Assert.That(days[i] - days[i - 1], Is.GreaterThanOrEqualTo(7));
+                for (var i = 1; i < days.Length; i++) Assert.That(days[i] - days[i - 1], Is.GreaterThanOrEqualTo(5));
             }
             Assert.That(fixtures.All(f => f.ScheduledDay <= SimulationCalendar.DayFromDate(season.EndDate)), Is.True);
             var expected = fixtures.Select(f => f.Id + f.HomeTeamId + f.AwayTeamId).ToArray();
@@ -55,6 +55,32 @@ namespace BeAFootballer.Simulation.Tests
         {
             var fixtures = new DoubleRoundRobinStrategy().Generate(Season(10, duration));
             Assert.That(fixtures.First(f => f.Matchday == 2).ScheduledDay - fixtures[0].ScheduledDay, Is.EqualTo(interval));
+        }
+
+        [Test]
+        public void JittersRoundDatesWhenTheSeasonHasSlack()
+        {
+            var season = Season(20, 300);
+            var fixtures = new DoubleRoundRobinStrategy().Generate(season);
+            var roundDays = fixtures.Where(f => f.Matchday == 1).Select(f => f.ScheduledDay).Distinct().Count();
+            Assert.That(roundDays, Is.GreaterThan(1));
+            Assert.That(fixtures.Max(f => f.ScheduledDay), Is.LessThanOrEqualTo(SimulationCalendar.DayFromDate(season.EndDate)));
+            var other = Season(20, 300);
+            other.Id = "la-liga-2026";
+            other.LeagueId = "la-liga";
+            var otherDays = new DoubleRoundRobinStrategy().Generate(other)
+                .Where(f => f.Matchday == 1).OrderBy(f => f.Id, StringComparer.Ordinal).Select(f => f.ScheduledDay).ToArray();
+            var firstDays = fixtures.Where(f => f.Matchday == 1).OrderBy(f => f.Id, StringComparer.Ordinal).Select(f => f.ScheduledDay).ToArray();
+            Assert.That(otherDays, Is.Not.EqualTo(firstDays));
+            var again = new DoubleRoundRobinStrategy().Generate(season);
+            Assert.That(again.Select(f => f.Id + f.ScheduledDay + f.HomeTeamId), Is.EqualTo(fixtures.Select(f => f.Id + f.ScheduledDay + f.HomeTeamId)));
+        }
+
+        [Test]
+        public void TightSeasonsKeepASingleDayPerRound()
+        {
+            var fixtures = new DoubleRoundRobinStrategy().Generate(Season(10, 119));
+            Assert.That(fixtures.Where(f => f.Matchday == 1).Select(f => f.ScheduledDay).Distinct().Count(), Is.EqualTo(1));
         }
 
         [Test]

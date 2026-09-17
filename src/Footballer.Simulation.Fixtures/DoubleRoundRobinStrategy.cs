@@ -4,7 +4,9 @@ using BeAFootballer.Simulation.Data;
 
 namespace BeAFootballer.Simulation.Fixtures
 {
-    /// <summary>Circle-method rounds; odd squads of teams receive a bye. Second leg reverses venues.</summary>
+    /// <summary>Circle-method rounds; odd squads of teams receive a bye. Second leg reverses venues.
+    /// When the season has leftover days, each fixture is shifted by a deterministic jitter so a round
+    /// is not forced onto a single date. Team gaps stay at least five days.</summary>
     public sealed class DoubleRoundRobinStrategy : ISeasonFixtureStrategy
     {
         public string Id => "double-round-robin";
@@ -31,6 +33,8 @@ namespace BeAFootballer.Simulation.Fixtures
             var interval = Math.Min(7, (end - start) / (totalRounds - 1));
             if (end < start || interval < 5)
                 throw new ArgumentException("Season is too short: rounds need at least five days between them.");
+            var lastBase = start + (totalRounds - 1) * interval;
+            var slack = Math.Min(interval - 5, end - lastBase);
 
             var result = new List<Fixture>();
             for (var round = 0; round < roundsPerLeg; round++)
@@ -41,17 +45,67 @@ namespace BeAFootballer.Simulation.Fixtures
                     var away = teams[teams.Count - 1 - pair];
                     if (home == null || away == null) continue;
                     if (round % 2 != 0) { var swap = home; home = away; away = swap; }
-                    result.Add(Create(season, round, pair, start + round * interval, home, away));
+                    result.Add(Create(season, round, pair, Day(season, start, interval, slack, round, pair), home, away));
                     var returnRound = round + roundsPerLeg;
-                    result.Add(Create(season, returnRound, pair, start + returnRound * interval, away, home));
+                    result.Add(Create(season, returnRound, pair, Day(season, start, interval, slack, returnRound, pair), away, home));
                 }
                 var last = teams[teams.Count - 1];
                 teams.RemoveAt(teams.Count - 1);
                 teams.Insert(1, last);
             }
+            AnchorRoundsToBaseDay(result, start, interval);
             result.Sort((a, b) => a.ScheduledDay != b.ScheduledDay
                 ? a.ScheduledDay.CompareTo(b.ScheduledDay) : StringComparer.Ordinal.Compare(a.Id, b.Id));
             return result;
+        }
+
+        private static void AnchorRoundsToBaseDay(List<Fixture> fixtures, int start, int interval)
+        {
+            if (fixtures.Count == 0) return;
+            var groups = new Dictionary<int, List<Fixture>>();
+            foreach (var fixture in fixtures)
+            {
+                if (!groups.TryGetValue(fixture.Matchday, out var group))
+                    groups[fixture.Matchday] = group = new List<Fixture>();
+                group.Add(fixture);
+            }
+            foreach (var pair in groups)
+            {
+                var baseDay = start + (pair.Key - 1) * interval;
+                var min = pair.Value[0].ScheduledDay;
+                for (var i = 1; i < pair.Value.Count; i++)
+                    if (pair.Value[i].ScheduledDay < min) min = pair.Value[i].ScheduledDay;
+                var shift = min - baseDay;
+                if (shift <= 0) continue;
+                foreach (var fixture in pair.Value) fixture.ScheduledDay -= shift;
+            }
+        }
+
+        private static int Day(LeagueSeason season, int start, int interval, int slack, int round, int pair) =>
+            start + round * interval + Jitter(season, round, pair, slack);
+
+        // FNV-1a 32-bit. Deterministic mixer so jitter is stable across processes.
+        private const uint FnvOffset = 2166136261;
+        private const uint FnvPrime = 16777619;
+
+        private static int Jitter(LeagueSeason season, int round, int pair, int slack)
+        {
+            if (slack <= 0) return 0;
+            unchecked
+            {
+                var hash = Fold(Fold(FnvOffset, season.LeagueId), season.Id);
+                hash = (hash ^ (uint)(round + 1)) * FnvPrime;
+                hash = (hash ^ (uint)(pair + 1)) * FnvPrime;
+                return (int)(hash % (uint)(slack + 1));
+            }
+        }
+
+        private static uint Fold(uint hash, string value)
+        {
+            if (string.IsNullOrEmpty(value)) return hash;
+            for (var i = 0; i < value.Length; i++)
+                hash = (hash ^ value[i]) * FnvPrime;
+            return hash;
         }
 
         private static Fixture Create(LeagueSeason season, int round, int pair, int day, string home, string away)

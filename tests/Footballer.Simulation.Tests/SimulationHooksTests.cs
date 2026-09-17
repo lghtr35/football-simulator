@@ -40,9 +40,12 @@ namespace BeAFootballer.Simulation.Tests
                 }
             };
             var api = new SimulationApi(store, new SimulationOptions { BatchSize = 1 }, hooks: hooks);
-            var stop = await api.AdvanceUntilStopAsync(1);
+            var stop = await api.AdvanceUntilStopAsync(21);
+            Assert.That(stop, Is.Not.Null);
             Assert.That(stop.Stage, Is.EqualTo(SimulationStage.BeforeMatch));
-            Assert.That(api.Fixtures(new FixtureFilter { IsPlayed = true }), Has.Count.EqualTo(2));
+            Assert.That(stop.Fixture, Is.Not.Null);
+            Assert.That(api.Fixtures(new FixtureFilter { FromDay = stop.Day, ToDay = stop.Day, IsPlayed = false, Limit = 50 })
+                .Exists(f => f.Id == stop.Fixture.Id));
             Assert.That(store.LoadMetadata().CurrentDay, Is.EqualTo(stop.Day));
             var team = stop.Home.Coach.IsActor ? stop.Home : stop.Away;
             var ids = team.Players.OrderBy(p => p.Definition.Overall).ThenBy(p => p.Definition.Id).Select(p => p.Definition.Id).ToArray();
@@ -70,7 +73,7 @@ namespace BeAFootballer.Simulation.Tests
                     !c.Home.Players.Concat(c.Away.Players).Any(p => p.Definition.IsActor)
             };
             var api = new SimulationApi(store, hooks: hooks);
-            var stop = await api.AdvanceUntilStopAsync(1);
+            var stop = await api.AdvanceUntilStopAsync(21);
             Assert.That(stop.Fixture, Is.Not.Null);
             Assert.That(await api.SimulateBackgroundAsync(stop.Fixture.Id), Is.Zero);
             ready = true; // The game's match flow now owns control.
@@ -104,16 +107,27 @@ namespace BeAFootballer.Simulation.Tests
                 return true;
             } };
             var api = new SimulationApi(store, hooks: hooks);
+            var day = store.LoadMetadata().CurrentDay;
+            var today = api.Fixtures(new FixtureFilter { FromDay = day, ToDay = day, Limit = 50 }).Count;
             Assert.ThrowsAsync<ArgumentException>(() => api.AdvanceDaysAsync(1));
             Assert.That(api.Fixtures(new FixtureFilter { IsPlayed = true }), Is.Empty);
             invalid = false;
             await api.AdvanceDaysAsync(1);
-            Assert.That(api.Fixtures(new FixtureFilter { IsPlayed = true }), Has.Count.EqualTo(3));
+            Assert.That(api.Fixtures(new FixtureFilter { IsPlayed = true }), Has.Count.EqualTo(today));
         }
 
         [Test] public async Task PausedLifePageCanBeRetriedWithoutCommittingPartialPlayerUpdates()
         {
             await new SimulationApi(store).AdvanceDaysAsync(1);
+            using (var c = new SqliteConnection("Data Source=" + path + ";Pooling=False"))
+            {
+                c.Open();
+                using (var cmd = c.CreateCommand())
+                {
+                    cmd.CommandText = "UPDATE FootballerState SET Fatigue=80 WHERE FootballerId='team-1-player-1';";
+                    cmd.ExecuteNonQuery();
+                }
+            }
             var blocked = true;
             var hooks = new SimulationHooks { TryContinue = c => c.Stage != SimulationStage.BeforeLife || !blocked };
             var api = new SimulationApi(store, hooks: hooks);

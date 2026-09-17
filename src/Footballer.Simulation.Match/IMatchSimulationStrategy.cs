@@ -11,6 +11,12 @@ namespace BeAFootballer.Simulation.Match
         MatchResult Simulate(MatchInput input, CancellationToken cancellationToken);
     }
 
+    /// <summary>Optional async entry. Core awaits a day's matches together under the worker cap.</summary>
+    public interface IAsyncMatchSimulationStrategy : IMatchSimulationStrategy
+    {
+        System.Threading.Tasks.Task<MatchResult> SimulateAsync(MatchInput input, CancellationToken cancellationToken);
+    }
+
     // Extension for a future pitch engine. The host controls stepping and may inject decisions for any ID.
     public interface IContinuousMatchStrategy
     {
