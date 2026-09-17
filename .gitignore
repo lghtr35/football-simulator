@@ -60,3 +60,9 @@ nunit-*.xml
 *.db
 *.db-wal
 *.db-shm
+
+# Editor settings (local only)
+.vscode/
+
+# Throwaway CLI / manual simulation experiments
+manual/
