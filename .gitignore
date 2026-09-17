@@ -55,3 +55,8 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Local simulation worlds (not library source)
+*.db
+*.db-wal
+*.db-shm

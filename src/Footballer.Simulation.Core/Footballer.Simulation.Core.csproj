@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>netstandard2.1</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Footballer.Simulation.Data\Footballer.Simulation.Data.csproj" />
+    <ProjectReference Include="..\Footballer.Simulation.Match\Footballer.Simulation.Match.csproj" />
+    <ProjectReference Include="..\Footballer.Simulation.Fixtures\Footballer.Simulation.Fixtures.csproj" />
+    <ProjectReference Include="..\Footballer.Simulation.Life\Footballer.Simulation.Life.csproj" />
+    <ProjectReference Include="..\Footballer.Simulation.Career\Footballer.Simulation.Career.csproj" />
+  </ItemGroup>
+</Project>
