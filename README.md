@@ -1,6 +1,6 @@
 # Be A Footballer Simulation
 
-Open `Footballer.Simulation.sln` in Cursor. The shared API and rule libraries target `netstandard2.1`.
+The shared API and rule libraries target `netstandard2.1`.
 Start with [Running a playthrough](RUNNING.md) for complete API and integration-test examples.
 
 Dependency direction: Api → Core → Match/Fixtures/Life/Career → Data.
